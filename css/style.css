@@ -306,3 +306,21 @@ h1 {
 		-moz-transform-origin: 50% -170%;
 	}
 }
+
+.result-image {
+	width: 75%;
+	height: 75%;
+	object-fit: contain;
+}
+
+.back-button {
+	background: #52a3d0;
+	color: white;
+	border: none;
+	padding: 16px;
+	padding: 1rem;
+	margin: 16px;
+	margin: 1rem;
+	font-size: 1rem;
+	cursor: pointer;
+}

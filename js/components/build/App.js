@@ -209,16 +209,16 @@ var Result = function (_React$Component4) {
 		value: function render() {
 			return _react2.default.createElement(
 				'div',
-				{ id: 'result' },
+				{ id: 'result', className: 'flex one column align-center justify-center' },
 				_react2.default.createElement(
 					'h1',
 					null,
-					'Result'
+					'Here is your image in UV light'
 				),
-				_react2.default.createElement('img', { src: this.props.file }),
+				_react2.default.createElement('img', { className: 'result-image', src: this.props.file }),
 				_react2.default.createElement(
 					'button',
-					{ onClick: function onClick() {
+					{ className: 'back-button flex align-center justify-center ', onClick: function onClick() {
 							dispatcher.dispatch({ page: 'main' });
 						} },
 					'Back'

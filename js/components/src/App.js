@@ -100,10 +100,10 @@ class Processing extends React.Component {
 class Result extends React.Component {
 	render() {
 		return (
-			<div id='result'>
-				<h1>Result</h1>
-				<img src={ this.props.file } />
-				<button onClick={ () => { dispatcher.dispatch({ page: 'main' }); } }>Back</button>
+			<div id='result' className='flex one column align-center justify-center'>
+				<h1>Here is your image in UV light</h1>
+				<img className='result-image' src={ this.props.file } />
+				<button className='back-button flex align-center justify-center ' onClick={ () => { dispatcher.dispatch({ page: 'main' }); } }>Back</button>
 			</div>
 		)
 	}

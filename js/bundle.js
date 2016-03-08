@@ -107,11 +107,8 @@
 					case 'main':
 						page = _react2.default.createElement(Main, null);
 						break;
-					case 'capture':
-						page = _react2.default.createElement(Capture, null);
-						break;
-					case 'post-process':
-						page = _react2.default.createElement(PostProcess, null);
+					case 'processing':
+						page = _react2.default.createElement(Processing, null);
 						break;
 					case 'result':
 						page = _react2.default.createElement(Result, { file: this.state.file });
@@ -123,7 +120,7 @@
 
 				return _react2.default.createElement(
 					'div',
-					{ id: 'app' },
+					{ id: 'app', className: 'flex one' },
 					page
 				);
 			}
@@ -135,8 +132,7 @@
 				this.listenerID = dispatcher.register(function (payload) {
 					switch (payload.page) {
 						case 'main':
-						case 'capture':
-						case 'post-process':
+						case 'processing':
 							_this2.setState({ page: payload.page });
 							break;
 						case 'result':
@@ -169,13 +165,24 @@
 			value: function render() {
 				return _react2.default.createElement(
 					'div',
-					{ id: 'main' },
+					{ id: 'main', className: 'flex column one align-center justify-center' },
+					_react2.default.createElement('img', { src: 'images/vaseline_logo.png' }),
+					_react2.default.createElement(
+						'h1',
+						{ className: 'main-title' },
+						'VASELINE HEALTHY WHITE'
+					),
 					_react2.default.createElement(
 						'button',
-						{ onClick: function onClick() {
-								dispatcher.dispatch({ page: 'capture' });
+						{ className: 'take-photo-button flex align-center justify-center', onClick: function onClick() {
+								dispatcher.dispatch({ page: 'processing' });
 							} },
-						'Capture'
+						_react2.default.createElement('img', { className: 'take-photo-icon', src: 'images/icon_camera.png' }),
+						_react2.default.createElement(
+							'span',
+							{ className: 'take-photo-text' },
+							'TAKE PHOTO'
+						)
 					)
 				);
 			}
@@ -184,25 +191,35 @@
 		return Main;
 	}(_react2.default.Component);
 
-	var Capture = function (_React$Component3) {
-		_inherits(Capture, _React$Component3);
+	var Processing = function (_React$Component3) {
+		_inherits(Processing, _React$Component3);
 
-		function Capture() {
-			_classCallCheck(this, Capture);
+		function Processing() {
+			_classCallCheck(this, Processing);
 
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(Capture).apply(this, arguments));
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Processing).apply(this, arguments));
 		}
 
-		_createClass(Capture, [{
+		_createClass(Processing, [{
 			key: 'render',
 			value: function render() {
 				return _react2.default.createElement(
 					'div',
-					{ id: 'capture' },
+					{ id: 'processing', className: 'flex column one' },
 					_react2.default.createElement(
-						'h1',
+						'div',
 						null,
-						'Capturing photo..'
+						_react2.default.createElement('img', { className: 'logo-small', src: 'images/vaseline_logo_s.png' })
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'flex column one align-center justify-center' },
+						_react2.default.createElement(Spinner, null),
+						_react2.default.createElement(
+							'h1',
+							{ className: 'processing-text' },
+							'Your image is being processed..'
+						)
 					)
 				);
 			}
@@ -212,9 +229,8 @@
 				_jquery2.default.ajax({
 					url: '/api/capture',
 					method: 'POST'
-				}).done(function (response) {
-					console.log('captured');
-					dispatcher.dispatch({ page: 'post-process' });
+				}).done(function (file) {
+					dispatcher.dispatch({ page: 'result', file: 'tv/' + file });
 				}).fail(function (response) {
 					alert('Failed to capture the photo!');
 					dispatcher.dispatch({ page: 'main' });
@@ -222,51 +238,11 @@
 			}
 		}]);
 
-		return Capture;
+		return Processing;
 	}(_react2.default.Component);
 
-	var PostProcess = function (_React$Component4) {
-		_inherits(PostProcess, _React$Component4);
-
-		function PostProcess() {
-			_classCallCheck(this, PostProcess);
-
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(PostProcess).apply(this, arguments));
-		}
-
-		_createClass(PostProcess, [{
-			key: 'render',
-			value: function render() {
-				return _react2.default.createElement(
-					'div',
-					{ id: 'post-process' },
-					_react2.default.createElement(
-						'h1',
-						null,
-						'Post Processing..'
-					)
-				);
-			}
-		}, {
-			key: 'componentDidMount',
-			value: function componentDidMount() {
-				_jquery2.default.ajax({
-					url: '/api/post_process',
-					method: 'POST'
-				}).done(function (file) {
-					dispatcher.dispatch({ page: 'result', file: 'tv/' + file });
-				}).fail(function (response) {
-					alert('Failed to post process the photo!');
-					dispatcher.dispatch({ page: 'main' });
-				});
-			}
-		}]);
-
-		return PostProcess;
-	}(_react2.default.Component);
-
-	var Result = function (_React$Component5) {
-		_inherits(Result, _React$Component5);
+	var Result = function (_React$Component4) {
+		_inherits(Result, _React$Component4);
 
 		function Result() {
 			_classCallCheck(this, Result);
@@ -298,6 +274,41 @@
 		}]);
 
 		return Result;
+	}(_react2.default.Component);
+
+	var Spinner = function (_React$Component5) {
+		_inherits(Spinner, _React$Component5);
+
+		function Spinner() {
+			_classCallCheck(this, Spinner);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Spinner).apply(this, arguments));
+		}
+
+		_createClass(Spinner, [{
+			key: 'render',
+			value: function render() {
+				return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { className: 'cssload-thing' }),
+					_react2.default.createElement('div', { style: { clear: 'both' } })
+				);
+			}
+		}]);
+
+		return Spinner;
 	}(_react2.default.Component);
 
 	_reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById('root'));

@@ -16,11 +16,8 @@ class App extends React.Component {
 		case 'main':
 			page = <Main />;
 			break;
-		case 'capture':
-			page = <Capture />;
-			break;
-		case 'post-process':
-			page = <PostProcess />;
+		case 'processing':
+			page = <Processing />;
 			break;
 		case 'result':
 			page = <Result file={ this.state.file } />;
@@ -31,7 +28,7 @@ class App extends React.Component {
 		}
 
 		return (
-			<div id='app'>
+			<div id='app' className='flex one'>
 				{ page }
 			</div>
 		)
@@ -44,8 +41,7 @@ class App extends React.Component {
 		this.listenerID = dispatcher.register((payload) => {
 			switch (payload.page) {
 			case 'main':
-			case 'capture':
-			case 'post-process':
+			case 'processing':
 				this.setState({ page: payload.page });
 				break;
 			case 'result':
@@ -62,20 +58,29 @@ class App extends React.Component {
 class Main extends React.Component {
 	render() {
 		return (
-			<div id='main'>
-				<button onClick={ () => { dispatcher.dispatch({ page: 'capture' }) } }>
-					Capture
+			<div id='main' className='flex column one align-center justify-center'>
+				<img src='images/vaseline_logo.png' />
+				<h1 className='main-title'>VASELINE HEALTHY WHITE</h1>
+				<button className='take-photo-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ page: 'processing' }) } }>
+					<img className='take-photo-icon' src='images/icon_camera.png' />
+					<span className='take-photo-text'>TAKE PHOTO</span>
 				</button>
 			</div>
 		)
 	}
 }
 
-class Capture extends React.Component {
+class Processing extends React.Component {
 	render() {
 		return (
-			<div id='capture'>
-				<h1>Capturing photo..</h1>
+			<div id='processing' className='flex column one'>
+				<div>
+					<img className='logo-small' src='images/vaseline_logo_s.png' />
+				</div>
+				<div className='flex column one align-center justify-center'>
+					<Spinner />
+					<h1 className='processing-text'>Your image is being processed..</h1>
+				</div>
 			</div>
 		)
 	}
@@ -83,32 +88,10 @@ class Capture extends React.Component {
 		$.ajax({
 			url: '/api/capture',
 			method: 'POST',
-		}).done((response) => {
-			console.log('captured');
-			dispatcher.dispatch({ page: 'post-process' });
-		}).fail((response) => {
-			alert('Failed to capture the photo!');
-			dispatcher.dispatch({ page: 'main' });
-		});
-	}
-}
-
-class PostProcess extends React.Component {
-	render() {
-		return (
-			<div id='post-process'>
-				<h1>Post Processing..</h1>
-			</div>
-		)
-	}
-	componentDidMount() {
-		$.ajax({
-			url: '/api/post_process',
-			method: 'POST',
 		}).done((file) => {
 			dispatcher.dispatch({ page: 'result', file: 'tv/' + file });
 		}).fail((response) => {
-			alert('Failed to post process the photo!');
+			alert('Failed to capture the photo!');
 			dispatcher.dispatch({ page: 'main' });
 		});
 	}
@@ -121,6 +104,28 @@ class Result extends React.Component {
 				<h1>Result</h1>
 				<img src={ this.props.file } />
 				<button onClick={ () => { dispatcher.dispatch({ page: 'main' }); } }>Back</button>
+			</div>
+		)
+	}
+}
+
+class Spinner extends React.Component {
+	render() {
+		return (
+			<div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div className='cssload-thing'></div>
+				<div style={ { clear: 'both' } } />
 			</div>
 		)
 	}

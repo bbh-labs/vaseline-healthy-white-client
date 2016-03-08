@@ -23,7 +23,7 @@ class App extends React.Component {
 			page = <PostProcess />;
 			break;
 		case 'result':
-			page = <Result file={ payload.file } />;
+			page = <Result file={ this.state.file } />;
 			break;
 		default:
 			page = null;
@@ -38,6 +38,7 @@ class App extends React.Component {
 	}
 	state = {
 		page: 'main',
+		file: null,
 	};
 	componentDidMount() {
 		this.listenerID = dispatcher.register((payload) => {
@@ -45,8 +46,10 @@ class App extends React.Component {
 			case 'main':
 			case 'capture':
 			case 'post-process':
-			case 'result':
 				this.setState({ page: payload.page });
+				break;
+			case 'result':
+				this.setState({ page: payload.page, file: payload.file });
 				break;
 			}
 		});
@@ -103,7 +106,7 @@ class PostProcess extends React.Component {
 			url: '/api/post_process',
 			method: 'POST',
 		}).done((file) => {
-			dispatcher.dispatch({ page: 'result', file: file });
+			dispatcher.dispatch({ page: 'result', file: 'tv/' + file });
 		}).fail((response) => {
 			alert('Failed to post process the photo!');
 			dispatcher.dispatch({ page: 'main' });
@@ -117,6 +120,7 @@ class Result extends React.Component {
 			<div id='result'>
 				<h1>Result</h1>
 				<img src={ this.props.file } />
+				<button onClick={ () => { dispatcher.dispatch({ page: 'main' }); } }>Back</button>
 			</div>
 		)
 	}

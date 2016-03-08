@@ -93,7 +93,8 @@
 			}
 
 			return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(App)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.state = {
-				page: 'main'
+				page: 'main',
+				file: null
 			}, _temp), _possibleConstructorReturn(_this, _ret);
 		}
 
@@ -113,7 +114,7 @@
 						page = _react2.default.createElement(PostProcess, null);
 						break;
 					case 'result':
-						page = _react2.default.createElement(Result, { file: payload.file });
+						page = _react2.default.createElement(Result, { file: this.state.file });
 						break;
 					default:
 						page = null;
@@ -136,8 +137,10 @@
 						case 'main':
 						case 'capture':
 						case 'post-process':
-						case 'result':
 							_this2.setState({ page: payload.page });
+							break;
+						case 'result':
+							_this2.setState({ page: payload.page, file: payload.file });
 							break;
 					}
 				});
@@ -251,7 +254,7 @@
 					url: '/api/post_process',
 					method: 'POST'
 				}).done(function (file) {
-					dispatcher.dispatch({ page: 'result', file: file });
+					dispatcher.dispatch({ page: 'result', file: 'tv/' + file });
 				}).fail(function (response) {
 					alert('Failed to post process the photo!');
 					dispatcher.dispatch({ page: 'main' });
@@ -282,7 +285,14 @@
 						null,
 						'Result'
 					),
-					_react2.default.createElement('img', { src: this.props.file })
+					_react2.default.createElement('img', { src: this.props.file }),
+					_react2.default.createElement(
+						'button',
+						{ onClick: function onClick() {
+								dispatcher.dispatch({ page: 'main' });
+							} },
+						'Back'
+					)
 				);
 			}
 		}]);

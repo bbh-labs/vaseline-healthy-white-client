@@ -114,7 +114,7 @@
 
 				return _react2.default.createElement(
 					'div',
-					{ id: 'app' },
+					{ id: 'app', className: 'flex one' },
 					page
 				);
 			}
@@ -155,7 +155,7 @@
 			value: function render() {
 				return _react2.default.createElement(
 					'div',
-					{ id: 'main' },
+					{ id: 'main', className: 'flex one align-center justify-center' },
 					_react2.default.createElement('img', { src: this.props.file })
 				);
 			}

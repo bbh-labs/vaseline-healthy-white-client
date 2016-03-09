@@ -22,7 +22,7 @@ class App extends React.Component {
 		}
 
 		return (
-			<div id='app'>
+			<div id='app' className='flex one'>
 				{ page }
 			</div>
 		)
@@ -48,7 +48,7 @@ class App extends React.Component {
 class Main extends React.Component {
 	render() {
 		return (
-			<div id='main'>
+			<div id='main' className='flex one align-center justify-center'>
 				<img src={ this.props.file } />
 			</div>
 		)

@@ -10,7 +10,7 @@ html, body, #root, #app {
 }
 
 #app {
-	background: linear-gradient(#ffffff, #f7f7f7);
+	background: linear-gradient(#ffffff, #f3f3f3);
 }
 
 h1 {
@@ -20,17 +20,19 @@ h1 {
 
 .take-photo-button {
 	width: 300px;
-	height: 80px;
+	height: 60px;
 	background: #52a3d0;
 	color: white;
 	border: none;
-	font-size: 2rem;
+	font-size: 1.6rem;
 	padding: 16px;
 	cursor: pointer;
+	margin-top: 30px;
 }
 
 .take-photo-icon {
 	float: left;
+	height: 90%;
 }
 
 .logo-small {

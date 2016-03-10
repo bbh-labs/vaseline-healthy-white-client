@@ -47,16 +47,14 @@ class App extends React.Component {
 	componentDidMount() {
 		this.listenerID = dispatcher.register((payload) => {
 			switch (payload.page) {
-			case 'main':
-			case 'capturing':
-			case 'post-processing':
-				this.setState({ page: payload.page });
-				break;
-			case 'raw-output':
-				this.setState({ page: payload.page, rawOutput: payload.rawOutput });
-				break;
-			case 'output':
-				this.setState({ page: payload.page, outputs: payload.outputs });
+			case 'goto':
+				if (payload.page == 'raw-output') {
+					this.setState({ page: payload.page, rawOutput: payload.rawOutput });
+				} else if (payload.page == 'output') {
+					this.setState({ page: payload.page, outputs: payload.outputs });
+				} else {
+					this.setState({ page: payload.page });
+				}
 				break;
 			}
 		});
@@ -72,7 +70,7 @@ class Main extends React.Component {
 			<div id='main' className='flex column one align-center justify-center'>
 				<img src='images/vaseline_logo.png' />
 				<h1 className='main-title'>VASELINE HEALTHY WHITE</h1>
-				<button className='take-photo-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ page: 'capturing' }) } }>
+				<button className='take-photo-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ type: 'goto', page: 'capturing' }) } }>
 					<img className='take-photo-icon' src='images/icon_camera.png' />
 					<span className='take-photo-text'>TAKE PHOTO</span>
 				</button>
@@ -100,10 +98,10 @@ class Capturing extends React.Component {
 			url: '/api/capture',
 			method: 'POST',
 		}).done((rawOutput) => {
-			dispatcher.dispatch({ page: 'raw-output', rawOutput: rawOutput });
+			dispatcher.dispatch({ type: 'goto', page: 'raw-output', rawOutput: rawOutput });
 		}).fail((response) => {
 			alert('Failed to capture the photo!');
-			dispatcher.dispatch({ page: 'main' });
+			dispatcher.dispatch({ type: 'goto', page: 'main' });
 		});
 	}
 }
@@ -115,8 +113,8 @@ class RawOutput extends React.Component {
 				<h1>Here is your image in UV light</h1>
 				<img className='raw-output-image' src={ 'tv/' + this.props.rawOutput } />
 				<div className='flex'>
-					<button className='back-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ page: 'main' }); } }>Back</button>
-					<button className='next-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ page: 'post-processing' }); } }>Next</button>
+					<button className='back-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ type: 'goto', page: 'main' }); } }>Back</button>
+					<button className='next-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ type: 'goto', page: 'post-processing' }); } }>Next</button>
 				</div>
 			</div>
 		)
@@ -143,10 +141,10 @@ class PostProcessing extends React.Component {
 			method: 'POST',
 			dataType: 'json',
 		}).done((outputs) => {
-			dispatcher.dispatch({ page: 'output', outputs: outputs });
+			dispatcher.dispatch({ type: 'goto', page: 'output', outputs: outputs });
 		}).fail((response) => {
 			alert('Failed to capture the photo!');
-			dispatcher.dispatch({ page: 'main' });
+			dispatcher.dispatch({ type: 'goto', page: 'main' });
 		});
 	}
 }
@@ -178,10 +176,10 @@ class Output extends React.Component {
 				method: 'POST',
 				data: { output: outputs[chosenOutput] } ,
 			}).done(() => {
-				dispatcher.dispatch({ page: 'main' });
+				dispatcher.dispatch({ type: 'goto', page: 'main' });
 			}).fail((response) => {
 				alert('Failed to finalize photo!');
-				dispatcher.dispatch({ page: 'main' });
+				dispatcher.dispatch({ type: 'goto', page: 'main' });
 			});
 		} else {
 			alert('You must choose an output!');

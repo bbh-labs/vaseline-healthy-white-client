@@ -92,16 +92,14 @@ var App = function (_React$Component) {
 
 			this.listenerID = dispatcher.register(function (payload) {
 				switch (payload.page) {
-					case 'main':
-					case 'capturing':
-					case 'post-processing':
-						_this2.setState({ page: payload.page });
-						break;
-					case 'raw-output':
-						_this2.setState({ page: payload.page, rawOutput: payload.rawOutput });
-						break;
-					case 'output':
-						_this2.setState({ page: payload.page, outputs: payload.outputs });
+					case 'goto':
+						if (payload.page == 'raw-output') {
+							_this2.setState({ page: payload.page, rawOutput: payload.rawOutput });
+						} else if (payload.page == 'output') {
+							_this2.setState({ page: payload.page, outputs: payload.outputs });
+						} else {
+							_this2.setState({ page: payload.page });
+						}
 						break;
 				}
 			});
@@ -140,7 +138,7 @@ var Main = function (_React$Component2) {
 				_react2.default.createElement(
 					'button',
 					{ className: 'take-photo-button flex align-center justify-center', onClick: function onClick() {
-							dispatcher.dispatch({ page: 'capturing' });
+							dispatcher.dispatch({ type: 'goto', page: 'capturing' });
 						} },
 					_react2.default.createElement('img', { className: 'take-photo-icon', src: 'images/icon_camera.png' }),
 					_react2.default.createElement(
@@ -195,10 +193,10 @@ var Capturing = function (_React$Component3) {
 				url: '/api/capture',
 				method: 'POST'
 			}).done(function (rawOutput) {
-				dispatcher.dispatch({ page: 'raw-output', rawOutput: rawOutput });
+				dispatcher.dispatch({ type: 'goto', page: 'raw-output', rawOutput: rawOutput });
 			}).fail(function (response) {
 				alert('Failed to capture the photo!');
-				dispatcher.dispatch({ page: 'main' });
+				dispatcher.dispatch({ type: 'goto', page: 'main' });
 			});
 		}
 	}]);
@@ -233,14 +231,14 @@ var RawOutput = function (_React$Component4) {
 					_react2.default.createElement(
 						'button',
 						{ className: 'back-button flex align-center justify-center', onClick: function onClick() {
-								dispatcher.dispatch({ page: 'main' });
+								dispatcher.dispatch({ type: 'goto', page: 'main' });
 							} },
 						'Back'
 					),
 					_react2.default.createElement(
 						'button',
 						{ className: 'next-button flex align-center justify-center', onClick: function onClick() {
-								dispatcher.dispatch({ page: 'post-processing' });
+								dispatcher.dispatch({ type: 'goto', page: 'post-processing' });
 							} },
 						'Next'
 					)
@@ -292,10 +290,10 @@ var PostProcessing = function (_React$Component5) {
 				method: 'POST',
 				dataType: 'json'
 			}).done(function (outputs) {
-				dispatcher.dispatch({ page: 'output', outputs: outputs });
+				dispatcher.dispatch({ type: 'goto', page: 'output', outputs: outputs });
 			}).fail(function (response) {
 				alert('Failed to capture the photo!');
-				dispatcher.dispatch({ page: 'main' });
+				dispatcher.dispatch({ type: 'goto', page: 'main' });
 			});
 		}
 	}]);
@@ -329,10 +327,10 @@ var Output = function (_React$Component6) {
 					method: 'POST',
 					data: { output: outputs[chosenOutput] }
 				}).done(function () {
-					dispatcher.dispatch({ page: 'main' });
+					dispatcher.dispatch({ type: 'goto', page: 'main' });
 				}).fail(function (response) {
 					alert('Failed to finalize photo!');
-					dispatcher.dispatch({ page: 'main' });
+					dispatcher.dispatch({ type: 'goto', page: 'main' });
 				});
 			} else {
 				alert('You must choose an output!');

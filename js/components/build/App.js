@@ -48,7 +48,8 @@ var App = function (_React$Component) {
 
 		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(App)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.state = {
 			page: 'main',
-			file: null
+			rawOutput: null,
+			outputs: []
 		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 
@@ -61,11 +62,17 @@ var App = function (_React$Component) {
 				case 'main':
 					page = _react2.default.createElement(Main, null);
 					break;
-				case 'processing':
-					page = _react2.default.createElement(Processing, null);
+				case 'capturing':
+					page = _react2.default.createElement(Capturing, null);
 					break;
-				case 'result':
-					page = _react2.default.createElement(Result, { file: this.state.file });
+				case 'raw-output':
+					page = _react2.default.createElement(RawOutput, { rawOutput: this.state.rawOutput });
+					break;
+				case 'post-processing':
+					page = _react2.default.createElement(PostProcessing, null);
+					break;
+				case 'output':
+					page = _react2.default.createElement(Output, { outputs: this.state.outputs });
 					break;
 				default:
 					page = null;
@@ -86,11 +93,15 @@ var App = function (_React$Component) {
 			this.listenerID = dispatcher.register(function (payload) {
 				switch (payload.page) {
 					case 'main':
-					case 'processing':
+					case 'capturing':
+					case 'post-processing':
 						_this2.setState({ page: payload.page });
 						break;
-					case 'result':
-						_this2.setState({ page: payload.page, file: payload.file });
+					case 'raw-output':
+						_this2.setState({ page: payload.page, rawOutput: payload.rawOutput });
+						break;
+					case 'output':
+						_this2.setState({ page: payload.page, outputs: payload.outputs });
 						break;
 				}
 			});
@@ -129,7 +140,7 @@ var Main = function (_React$Component2) {
 				_react2.default.createElement(
 					'button',
 					{ className: 'take-photo-button flex align-center justify-center', onClick: function onClick() {
-							dispatcher.dispatch({ page: 'processing' });
+							dispatcher.dispatch({ page: 'capturing' });
 						} },
 					_react2.default.createElement('img', { className: 'take-photo-icon', src: 'images/icon_camera.png' }),
 					_react2.default.createElement(
@@ -145,21 +156,21 @@ var Main = function (_React$Component2) {
 	return Main;
 }(_react2.default.Component);
 
-var Processing = function (_React$Component3) {
-	_inherits(Processing, _React$Component3);
+var Capturing = function (_React$Component3) {
+	_inherits(Capturing, _React$Component3);
 
-	function Processing() {
-		_classCallCheck(this, Processing);
+	function Capturing() {
+		_classCallCheck(this, Capturing);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(Processing).apply(this, arguments));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(Capturing).apply(this, arguments));
 	}
 
-	_createClass(Processing, [{
+	_createClass(Capturing, [{
 		key: 'render',
 		value: function render() {
 			return _react2.default.createElement(
 				'div',
-				{ id: 'processing', className: 'flex column one' },
+				{ id: 'capturing', className: 'flex column one' },
 				_react2.default.createElement(
 					'div',
 					null,
@@ -171,8 +182,8 @@ var Processing = function (_React$Component3) {
 					_react2.default.createElement(Spinner, null),
 					_react2.default.createElement(
 						'h1',
-						{ className: 'processing-text' },
-						'Your image is being processed..'
+						{ className: 'capturing-text' },
+						'Your image is being captured..'
 					)
 				)
 			);
@@ -183,8 +194,8 @@ var Processing = function (_React$Component3) {
 			_jquery2.default.ajax({
 				url: '/api/capture',
 				method: 'POST'
-			}).done(function (file) {
-				dispatcher.dispatch({ page: 'result', file: 'tv/' + file });
+			}).done(function (rawOutput) {
+				dispatcher.dispatch({ page: 'raw-output', rawOutput: rawOutput });
 			}).fail(function (response) {
 				alert('Failed to capture the photo!');
 				dispatcher.dispatch({ page: 'main' });
@@ -192,46 +203,177 @@ var Processing = function (_React$Component3) {
 		}
 	}]);
 
-	return Processing;
+	return Capturing;
 }(_react2.default.Component);
 
-var Result = function (_React$Component4) {
-	_inherits(Result, _React$Component4);
+var RawOutput = function (_React$Component4) {
+	_inherits(RawOutput, _React$Component4);
 
-	function Result() {
-		_classCallCheck(this, Result);
+	function RawOutput() {
+		_classCallCheck(this, RawOutput);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(Result).apply(this, arguments));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(RawOutput).apply(this, arguments));
 	}
 
-	_createClass(Result, [{
+	_createClass(RawOutput, [{
 		key: 'render',
 		value: function render() {
 			return _react2.default.createElement(
 				'div',
-				{ id: 'result', className: 'flex one column align-center justify-center' },
+				{ id: 'raw-output', className: 'flex one column align-center justify-center' },
 				_react2.default.createElement(
 					'h1',
 					null,
 					'Here is your image in UV light'
 				),
-				_react2.default.createElement('img', { className: 'result-image', src: this.props.file }),
+				_react2.default.createElement('img', { className: 'raw-output-image', src: 'tv/' + this.props.rawOutput }),
 				_react2.default.createElement(
-					'button',
-					{ className: 'back-button flex align-center justify-center ', onClick: function onClick() {
-							dispatcher.dispatch({ page: 'main' });
-						} },
-					'Back'
+					'div',
+					{ className: 'flex' },
+					_react2.default.createElement(
+						'button',
+						{ className: 'back-button flex align-center justify-center', onClick: function onClick() {
+								dispatcher.dispatch({ page: 'main' });
+							} },
+						'Back'
+					),
+					_react2.default.createElement(
+						'button',
+						{ className: 'next-button flex align-center justify-center', onClick: function onClick() {
+								dispatcher.dispatch({ page: 'post-processing' });
+							} },
+						'Next'
+					)
 				)
 			);
 		}
 	}]);
 
-	return Result;
+	return RawOutput;
 }(_react2.default.Component);
 
-var Spinner = function (_React$Component5) {
-	_inherits(Spinner, _React$Component5);
+var PostProcessing = function (_React$Component5) {
+	_inherits(PostProcessing, _React$Component5);
+
+	function PostProcessing() {
+		_classCallCheck(this, PostProcessing);
+
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(PostProcessing).apply(this, arguments));
+	}
+
+	_createClass(PostProcessing, [{
+		key: 'render',
+		value: function render() {
+			return _react2.default.createElement(
+				'div',
+				{ id: 'post-processing', className: 'flex column one' },
+				_react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement('img', { className: 'logo-small', src: 'images/vaseline_logo_s.png' })
+				),
+				_react2.default.createElement(
+					'div',
+					{ className: 'flex column one align-center justify-center' },
+					_react2.default.createElement(Spinner, null),
+					_react2.default.createElement(
+						'h1',
+						{ className: 'post-processing-text' },
+						'Your image is being processed..'
+					)
+				)
+			);
+		}
+	}, {
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			_jquery2.default.ajax({
+				url: '/api/post_process',
+				method: 'POST',
+				dataType: 'json'
+			}).done(function (outputs) {
+				dispatcher.dispatch({ page: 'output', outputs: outputs });
+			}).fail(function (response) {
+				alert('Failed to capture the photo!');
+				dispatcher.dispatch({ page: 'main' });
+			});
+		}
+	}]);
+
+	return PostProcessing;
+}(_react2.default.Component);
+
+var Output = function (_React$Component6) {
+	_inherits(Output, _React$Component6);
+
+	function Output() {
+		var _Object$getPrototypeO2;
+
+		var _temp2, _this7, _ret2;
+
+		_classCallCheck(this, Output);
+
+		for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+			args[_key2] = arguments[_key2];
+		}
+
+		return _ret2 = (_temp2 = (_this7 = _possibleConstructorReturn(this, (_Object$getPrototypeO2 = Object.getPrototypeOf(Output)).call.apply(_Object$getPrototypeO2, [this].concat(args))), _this7), _this7.state = {
+			chosenOutput: -1
+		}, _this7.finalize = function () {
+			var outputs = _this7.props.outputs;
+			var chosenOutput = _this7.state.chosenOutput;
+
+			if (chosenOutput >= 0) {
+				_jquery2.default.ajax({
+					url: '/api/finalize',
+					method: 'POST',
+					data: { output: outputs[chosenOutput] }
+				}).done(function () {
+					dispatcher.dispatch({ page: 'main' });
+				}).fail(function (response) {
+					alert('Failed to finalize photo!');
+					dispatcher.dispatch({ page: 'main' });
+				});
+			} else {
+				alert('You must choose an output!');
+			}
+		}, _this7.choose = function (i) {
+			_this7.setState({ chosenOutput: i });
+		}, _temp2), _possibleConstructorReturn(_this7, _ret2);
+	}
+
+	_createClass(Output, [{
+		key: 'render',
+		value: function render() {
+			return _react2.default.createElement(
+				'div',
+				{ id: 'output', className: 'flex one column align-center justify-center' },
+				_react2.default.createElement(
+					'h1',
+					null,
+					'Here\'s your post-processed images'
+				),
+				_react2.default.createElement(
+					'div',
+					{ className: 'flex one align-center justify-center' },
+					_react2.default.createElement('img', { className: 'output-image', onClick: this.choose.bind(this, 0), src: 'tv/' + this.props.outputs[0] }),
+					_react2.default.createElement('img', { className: 'output-image', onClick: this.choose.bind(this, 1), src: 'tv/' + this.props.outputs[1] }),
+					_react2.default.createElement('img', { className: 'output-image', onClick: this.choose.bind(this, 2), src: 'tv/' + this.props.outputs[2] })
+				),
+				_react2.default.createElement(
+					'button',
+					{ className: 'back-button flex align-center justify-center', onClick: this.finalize },
+					'Finalize'
+				)
+			);
+		}
+	}]);
+
+	return Output;
+}(_react2.default.Component);
+
+var Spinner = function (_React$Component7) {
+	_inherits(Spinner, _React$Component7);
 
 	function Spinner() {
 		_classCallCheck(this, Spinner);

@@ -39,7 +39,8 @@ h1 {
 	object-fit: contain;
 }
 
-.processing-text {
+.capturing-text,
+.post-processing-text {
 	padding-top: 32px;
 	padding-top: 2rem;
 }
@@ -307,13 +308,19 @@ h1 {
 	}
 }
 
-.result-image {
+.raw-output-image {
 	width: 75%;
 	height: 75%;
 	object-fit: contain;
 }
 
-.back-button {
+.output-image {
+	width: 25%;
+	object-fit: contain;
+}
+
+.back-button,
+.next-button {
 	background: #52a3d0;
 	color: white;
 	border: none;

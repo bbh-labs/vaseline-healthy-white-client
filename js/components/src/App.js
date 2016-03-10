@@ -16,11 +16,17 @@ class App extends React.Component {
 		case 'main':
 			page = <Main />;
 			break;
-		case 'processing':
-			page = <Processing />;
+		case 'capturing':
+			page = <Capturing />;
 			break;
-		case 'result':
-			page = <Result file={ this.state.file } />;
+		case 'raw-output':
+			page = <RawOutput rawOutput={ this.state.rawOutput } />;
+			break;
+		case 'post-processing':
+			page = <PostProcessing />;
+			break;
+		case 'output':
+			page = <Output outputs={ this.state.outputs } />;
 			break;
 		default:
 			page = null;
@@ -35,17 +41,22 @@ class App extends React.Component {
 	}
 	state = {
 		page: 'main',
-		file: null,
+		rawOutput: null,
+		outputs: [],
 	};
 	componentDidMount() {
 		this.listenerID = dispatcher.register((payload) => {
 			switch (payload.page) {
 			case 'main':
-			case 'processing':
+			case 'capturing':
+			case 'post-processing':
 				this.setState({ page: payload.page });
 				break;
-			case 'result':
-				this.setState({ page: payload.page, file: payload.file });
+			case 'raw-output':
+				this.setState({ page: payload.page, rawOutput: payload.rawOutput });
+				break;
+			case 'output':
+				this.setState({ page: payload.page, outputs: payload.outputs });
 				break;
 			}
 		});
@@ -61,7 +72,7 @@ class Main extends React.Component {
 			<div id='main' className='flex column one align-center justify-center'>
 				<img src='images/vaseline_logo.png' />
 				<h1 className='main-title'>VASELINE HEALTHY WHITE</h1>
-				<button className='take-photo-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ page: 'processing' }) } }>
+				<button className='take-photo-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ page: 'capturing' }) } }>
 					<img className='take-photo-icon' src='images/icon_camera.png' />
 					<span className='take-photo-text'>TAKE PHOTO</span>
 				</button>
@@ -70,16 +81,16 @@ class Main extends React.Component {
 	}
 }
 
-class Processing extends React.Component {
+class Capturing extends React.Component {
 	render() {
 		return (
-			<div id='processing' className='flex column one'>
+			<div id='capturing' className='flex column one'>
 				<div>
 					<img className='logo-small' src='images/vaseline_logo_s.png' />
 				</div>
 				<div className='flex column one align-center justify-center'>
 					<Spinner />
-					<h1 className='processing-text'>Your image is being processed..</h1>
+					<h1 className='capturing-text'>Your image is being captured..</h1>
 				</div>
 			</div>
 		)
@@ -88,8 +99,8 @@ class Processing extends React.Component {
 		$.ajax({
 			url: '/api/capture',
 			method: 'POST',
-		}).done((file) => {
-			dispatcher.dispatch({ page: 'result', file: 'tv/' + file });
+		}).done((rawOutput) => {
+			dispatcher.dispatch({ page: 'raw-output', rawOutput: rawOutput });
 		}).fail((response) => {
 			alert('Failed to capture the photo!');
 			dispatcher.dispatch({ page: 'main' });
@@ -97,16 +108,88 @@ class Processing extends React.Component {
 	}
 }
 
-class Result extends React.Component {
+class RawOutput extends React.Component {
 	render() {
 		return (
-			<div id='result' className='flex one column align-center justify-center'>
+			<div id='raw-output' className='flex one column align-center justify-center'>
 				<h1>Here is your image in UV light</h1>
-				<img className='result-image' src={ this.props.file } />
-				<button className='back-button flex align-center justify-center ' onClick={ () => { dispatcher.dispatch({ page: 'main' }); } }>Back</button>
+				<img className='raw-output-image' src={ 'tv/' + this.props.rawOutput } />
+				<div className='flex'>
+					<button className='back-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ page: 'main' }); } }>Back</button>
+					<button className='next-button flex align-center justify-center' onClick={ () => { dispatcher.dispatch({ page: 'post-processing' }); } }>Next</button>
+				</div>
 			</div>
 		)
 	}
+}
+
+class PostProcessing extends React.Component {
+	render() {
+		return (
+			<div id='post-processing' className='flex column one'>
+				<div>
+					<img className='logo-small' src='images/vaseline_logo_s.png' />
+				</div>
+				<div className='flex column one align-center justify-center'>
+					<Spinner />
+					<h1 className='post-processing-text'>Your image is being processed..</h1>
+				</div>
+			</div>
+		)
+	}
+	componentDidMount() {
+		$.ajax({
+			url: '/api/post_process',
+			method: 'POST',
+			dataType: 'json',
+		}).done((outputs) => {
+			dispatcher.dispatch({ page: 'output', outputs: outputs });
+		}).fail((response) => {
+			alert('Failed to capture the photo!');
+			dispatcher.dispatch({ page: 'main' });
+		});
+	}
+}
+
+class Output extends React.Component {
+	render() {
+		return (
+			<div id='output' className='flex one column align-center justify-center'>
+				<h1>Here's your post-processed images</h1>
+				<div className='flex one align-center justify-center'>
+					<img className='output-image' onClick={ this.choose.bind(this, 0) }src={ 'tv/' + this.props.outputs[0] } />
+					<img className='output-image' onClick={ this.choose.bind(this, 1) }src={ 'tv/' + this.props.outputs[1] } />
+					<img className='output-image' onClick={ this.choose.bind(this, 2) }src={ 'tv/' + this.props.outputs[2] } />
+				</div>
+				<button className='back-button flex align-center justify-center' onClick={ this.finalize }>Finalize</button>
+			</div>
+		)
+	}
+	state = {
+		chosenOutput: -1,
+	};
+	finalize = () => {
+		let outputs = this.props.outputs;
+		let chosenOutput = this.state.chosenOutput;
+
+		if (chosenOutput >= 0) {
+			$.ajax({
+				url: '/api/finalize',
+				method: 'POST',
+				data: { output: outputs[chosenOutput] } ,
+			}).done(() => {
+				dispatcher.dispatch({ page: 'main' });
+			}).fail((response) => {
+				alert('Failed to finalize photo!');
+				dispatcher.dispatch({ page: 'main' });
+			});
+		} else {
+			alert('You must choose an output!');
+		}
+	};
+	choose = (i) => {
+		this.setState({ chosenOutput: i });
+	};
 }
 
 class Spinner extends React.Component {
